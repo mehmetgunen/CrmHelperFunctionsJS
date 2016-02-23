@@ -431,3 +431,58 @@ function PopulateAllRequiredFields(isMax) {
 		}
 	}
 }
+
+//Change status of an entity record
+function ChangeEntityRecordStatus(EntityLogicalName, RECORD_ID, stateCode, statusCode) {
+    // create the SetState request
+    var request = "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">";
+    request += "<s:Body>";
+    request += "<Execute xmlns=\"http://schemas.microsoft.com/xrm/2011/Contracts/Services\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\">";
+    request += "<request i:type=\"b:SetStateRequest\" xmlns:a=\"http://schemas.microsoft.com/xrm/2011/Contracts\" xmlns:b=\"http://schemas.microsoft.com/crm/2011/Contracts\">";
+    request += "<a:Parameters xmlns:c=\"http://schemas.datacontract.org/2004/07/System.Collections.Generic\">";
+    request += "<a:KeyValuePairOfstringanyType>";
+    request += "<c:key>EntityMoniker</c:key>";
+    request += "<c:value i:type=\"a:EntityReference\">";
+    request += "<a:Id>" + RECORD_ID + "</a:Id>";
+    request += "<a:LogicalName>" + EntityLogicalName + "</a:LogicalName>";
+    request += "<a:Name i:nil=\"true\" />";
+    request += "</c:value>";
+    request += "</a:KeyValuePairOfstringanyType>";
+    request += "<a:KeyValuePairOfstringanyType>";
+    request += "<c:key>State</c:key>";
+    request += "<c:value i:type=\"a:OptionSetValue\">";
+    request += "<a:Value>" + stateCode + "</a:Value>";
+    request += "</c:value>";
+    request += "</a:KeyValuePairOfstringanyType>";
+    request += "<a:KeyValuePairOfstringanyType>";
+    request += "<c:key>Status</c:key>";
+    request += "<c:value i:type=\"a:OptionSetValue\">";
+    request += "<a:Value>" + statusCode + "</a:Value>";
+    request += "</c:value>";
+    request += "</a:KeyValuePairOfstringanyType>";
+    request += "</a:Parameters>";
+    request += "<a:RequestId i:nil=\"true\" />";
+    request += "<a:RequestName>SetState</a:RequestName>";
+    request += "</request>";
+    request += "</Execute>";
+    request += "</s:Body>";
+    request += "</s:Envelope>";
+    //send set state request
+    $.ajax({
+        type: "POST",
+        contentType: "text/xml; charset=utf-8",
+        datatype: "xml",
+        url: Xrm.Page.context.getServerUrl() + "/XRMServices/2011/Organization.svc/web",
+        data: request,
+        beforeSend: function (XMLHttpRequest) {
+            XMLHttpRequest.setRequestHeader("Accept", "application/xml, text/xml, */*");
+            XMLHttpRequest.setRequestHeader("SOAPAction", "http://schemas.microsoft.com/xrm/2011/Contracts/Services/IOrganizationService/Execute");
+        },
+        success: function (data, textStatus, XmlHttpRequest) {
+            Xrm.Page.data.refresh(); // refresh current crm form
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert(errorThrown);
+        }
+    });
+}
