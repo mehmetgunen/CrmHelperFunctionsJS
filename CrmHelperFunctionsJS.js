@@ -486,3 +486,18 @@ function ChangeEntityRecordStatus(EntityLogicalName, RECORD_ID, stateCode, statu
         }
     });
 }
+
+//Check if all the mandatory fields are populated
+function CheckMandatoryFields() {
+    var populated = true;
+ 
+    Xrm.Page.getAttribute(function (attribute, index) {
+        if (attribute.getRequiredLevel() == "required") {
+            if(attribute.getValue() === null) {
+                populated = false;
+            }
+        }
+    });
+ 
+    return populated;
+}
